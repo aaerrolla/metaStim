@@ -1,0 +1,8 @@
+Lead,Type,Company,no,h_e [mm],r_e [mm],a_e [deg],ies [mm],h_tip [mm]
+3387,Traditional,Medtronic,4,1.5,0.635,N/A,1.5,1.5
+3389,Traditional,Medtronic,4,1.5,0.635,N/A,0.5,1.5
+2201,Traditional,Boston Scientific,8,1.5,0.635,N/A,0.5,1.5
+2202,Directional,Boston Scientific,8,1.5,0.635,90,0.5,1.5
+6172,Directional,Abbott Laboratories,8,1.5,0.635,104,0.5,1.5
+B33005,Directional,Medtronic,8,1.5,0.68,104,0.5,1
+B33015,Directional,Medtronic,8,1.5,0.68,104,1.5,1
