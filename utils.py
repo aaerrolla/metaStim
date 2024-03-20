@@ -15,28 +15,29 @@ class MetaStimUtil():
     # NOTES:
     # - each axon in this demo has the same number of nodes / points
     # - the code should be generalized so that each axon can have different # pts / axon
-    # - however, by this part in the code, only 11SD are calculated per axon, so data can be held in a 2D array
+    # - however, by this part in the code, only 11SD are calculated per axon, so data can be held in a 2D array    
     @staticmethod
     def get_field_sd(num_axons, phi_axon):
-        sd_axon = 1e3 * np.diff(phi_axon, n=2, axis=0) # V => mV
-        sd_max_indx = np.argmax(sd_axon, axis=0) # row index per column where SD is max
+        sd_axon = 1e3 * np.diff(phi_axon, n=2, axis=0)  # V => mV
+        sd_max_indx = np.argmax(sd_axon, axis=0)  # row index per column where SD is max
 
-        window_size = 11 # window size
-        nn = int((window_size - 1) / 2) # number of neighbors to left/right of max
-        sd_11_axon = np.zeros((window_size, sd_axon.shape[1])) # pre-allocate 11SD for each column
-
-        # define the bounds of the window
-        w_indx_l = np.maximum(sd_max_indx - nn, np.zeros(sd_max_indx.shape, dtype=int)) # first index of window
-        w_indx_r = np.minimum(sd_max_indx + nn, (sd_axon.shape[0] - 1) * np.ones(sd_max_indx.shape, dtype=int)) # last index of window
-
-        # in window is < 11 values, get pad counts
-        pad_l = np.maximum(nn - sd_max_indx, np.zeros(sd_max_indx.shape, dtype=int)) # how many to zero-pad to the left
-        pad_r = np.maximum(sd_max_indx - sd_axon.shape[0] + 1, np.zeros(sd_max_indx.shape, dtype=int)) # ditto for the right
+        window_size = 11  # window size
+        nn = int((window_size - 1) / 2)  # number of neighbors to left/right of max
+        sd_11_axon = np.zeros((window_size, sd_axon.shape[1]))  # pre-allocate 11SD for each column
 
         for k in range(0, num_axons):
-            sd_11_axon[:,k] = np.pad(sd_axon[w_indx_l[k]:w_indx_r[k]+1, k], (pad_l[k], pad_r[k]), 'constant')
-        return sd_11_axon
+            # define the bounds of the window
+            w_indx_l = np.maximum(sd_max_indx[k] - nn, 0)  # first index of window
+            w_indx_r = np.minimum(sd_max_indx[k] + nn, sd_axon.shape[0] - 1)  # last index of window
 
+            # calculate padding
+            pad_l = nn - (sd_max_indx[k] - w_indx_l)
+            pad_r = nn - (w_indx_r - sd_max_indx[k])
+
+            # pad the values within the window
+            sd_11_axon[:, k] = np.pad(sd_axon[w_indx_l:w_indx_r + 1, k], (pad_l, pad_r), 'constant')
+
+        return sd_11_axon
 
     # FUNCTION = field_shape(SD (req))
     # Short description: this is an auxiliary function that assigns a shape classification of potentials for each axon

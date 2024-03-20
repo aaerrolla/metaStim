@@ -17,6 +17,7 @@ if __name__ == "__main__":
     axon_ann_model = AxonANNModel(electrode_list, lead_radius, num_axons, min_distance, max_distance, axon_diameter, pulse_width, stimulation_amp)
 
     x_axon, y_axon, z_axon = axon_ann_model.axon_coord()
+
     phi_axon = axon_ann_model.field_ann()
     axon_act = axon_ann_model.axon_ann()
 
@@ -24,8 +25,8 @@ if __name__ == "__main__":
     visualization.visualize()
 
 
-    axon_ann_model.electrode_list = [1, 0, 0, 0, 0, 0, 0, 0]
-    axon_ann_model.stimulation_amp = 5
+    axon_ann_model.electrode_list = [0, 1, 1, 1, 1, 1, 1, 0]
+    axon_ann_model.stimulation_amp = 10
     
     x_axon, y_axon, z_axon = axon_ann_model.axon_coord()
     phi_axon = axon_ann_model.field_ann()
