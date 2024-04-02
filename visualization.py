@@ -1,10 +1,15 @@
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
+from lead_selector import LeadSelector
+
 
 class Visualization:
-    def __init__(self, lead_radius, stimulation_amp, num_axons, x_axon, z_axon, phi_axon, axon_activation):
-        self.lead_radius = lead_radius
+    def __init__(self, lead_id, stimulation_amp, num_axons, x_axon, z_axon, phi_axon, axon_activation):
+        lead_selector =  LeadSelector('DBSLead-smry.csv')
+        self.leads = lead_selector.load_leads();          
+        # self.lead_radius = lead_radius
+        self.validate_lead(lead_id)
         self.stimulation_amp = stimulation_amp
         self.num_axons = num_axons
         self.x_axon = x_axon
@@ -41,3 +46,12 @@ class Visualization:
             ax2.set_ylabel('$\Phi$ (V)', fontdict = font)
             
             plt.show()
+
+    def validate_lead(self, lead_id):
+        if lead_id not in self.leads.keys():
+            print(f"Invalid lead specified. Lead Id must be  of {self.leads.keys()}.")
+            exit(1)
+        else:
+            lead = self.leads.get(lead_id)         
+            # get radius 
+            self.lead_radius = lead.re

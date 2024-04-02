@@ -4,16 +4,22 @@ from keras.models import model_from_json
 from joblib import dump, load
 
 from utils import MetaStimUtil
+from lead_selector import LeadSelector
+
 
 # AxonANNModel : calculates the voltage required to activate the axons of neurons
 class AxonANNModel:
 
-    def __init__(self, electrode_list, lead_radius, num_axons, min_distance, max_distance, axon_diameter, pulse_width , stimulation_amp):
+    def __init__(self, electrode_list, lead_id, num_axons, min_distance, max_distance, axon_diameter, pulse_width , stimulation_amp):        
         self.axon_diameter = axon_diameter
+        self.validate_axon_diameter(axon_diameter)
         self.pulse_width = pulse_width
-        self.validate_input(axon_diameter, pulse_width)
+        self.validate_pulse_width(pulse_width)        
         self.electrode_list = electrode_list
-        self.lead_radius = lead_radius
+        self.validate_electrode_list(electrode_list)
+        lead_selector =  LeadSelector('DBSLead-smry.csv')
+        self.leads = lead_selector.load_leads();        
+        self.validate_lead(lead_id)        
         self.num_axons = num_axons
         self.min_distance = min_distance
         self.max_distance = max_distance        
@@ -165,21 +171,48 @@ class AxonANNModel:
     # for this demo, there are no errors
     # However, checks need to be in place to let the user know what values are acceptable or not
     # D, fiber diameter
-    def validate_input(self, axon_diameter, pulse_width):
+    def validate_axon_diameter(self, axon_diameter):
         if axon_diameter < 0:
             print('Negative fiber diameter (D)! D must be positive (> 0).')
             print('setting axon_diameter  to 6.')
-            self.axon_diameter = 6 # reset to default value and continue
+            self.axon_diameter = 6 # reset to default value and continue        
+        
         if axon_diameter < 1.5 or axon_diameter > 15:
             print('Warning! Accuracy may be degraded for fiber diameters outside of 1.5-15um.')  
             exit(-1)
 
+        
+    # CHECK INPUTS
+    # for this demo, there are no errors
+    # However, checks need to be in place to let the user know what values are acceptable or not
+    # D, fiber diameter
+    def validate_pulse_width(self, pulse_width):        
         # pw, stimulus pulse width
         if pulse_width < 0:
             print('Negative pulse width (PW)! PW must be positive (> 0).')
             exit(-2)
         # halt the code
-        if pulse_width < 30 or axon_diameter > 500:
+        if pulse_width < 30 or pulse_width > 500:
             print('Warning! Accuracy may be degraded for pulse widths outside of 30-500us.')
             exit(-3)
         
+
+    def validate_electrode_list(self, electrode_list):
+        for elec in electrode_list:
+            if elec not in [-1, 0, 1]:
+                print("Invalid electrode configuration. Elements must be either -1, 0, or 1.")
+                exit(-4)
+    
+    def validate_lead(self, lead_id):
+        if lead_id not in self.leads.keys():
+            print(f"Invalid lead specified. Lead Id must be  of {self.leads.keys()}.")
+            exit(1)
+        else:
+            lead = self.leads.get(lead_id)
+            if lead.no != len(self.electrode_list) :
+                print(f"Invalid electrode configuration. {lead_id} contains {lead.no} electrods")
+                exit(3)
+
+
+            # get radius 
+            self.lead_radius = lead.re
