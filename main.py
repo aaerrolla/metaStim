@@ -15,7 +15,9 @@ if __name__ == "__main__":
 
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1' 
 
-    axon_ann_model = AxonANNModel(electrode_list, lead_id, num_axons, min_distance, max_distance, axon_diameter, pulse_width, stimulation_amp)
+    # (self, lead_id, electrode_list, pulse_width , stimulation_amp, num_axons=10, min_distance=1, max_distance=5, axon_diameter=6):   
+
+    axon_ann_model = AxonANNModel(lead_id, electrode_list,  pulse_width, stimulation_amp, num_axons, min_distance, max_distance, axon_diameter)
 
     x_axon, y_axon, z_axon = axon_ann_model.axon_coord()
 

@@ -1,4 +1,5 @@
 import numpy as np
+import sys
 import os
 from keras.models import model_from_json
 from joblib import dump, load
@@ -10,20 +11,25 @@ from lead_selector import LeadSelector
 # AxonANNModel : calculates the voltage required to activate the axons of neurons
 class AxonANNModel:
 
-    def __init__(self, electrode_list, lead_id, num_axons, min_distance, max_distance, axon_diameter, pulse_width , stimulation_amp):        
+    def __init__(self, lead_id, electrode_list, pulse_width , stimulation_amp, num_axons=10, min_distance=1, max_distance=5, axon_diameter=6):        
         self.axon_diameter = axon_diameter
-        self.validate_axon_diameter(axon_diameter)
+        self._validate_axon_diameter(axon_diameter)
         self.pulse_width = pulse_width
-        self.validate_pulse_width(pulse_width)        
+        self._validate_pulse_width(pulse_width)        
         self.electrode_list = electrode_list
-        self.validate_electrode_list(electrode_list)
+        self._validate_electrode_list(electrode_list)
         lead_selector =  LeadSelector('DBSLead-smry.csv')
         self.leads = lead_selector.load_leads();        
-        self.validate_lead(lead_id)        
+        self._validate_lead(lead_id)        
+        # TODO: validation for num_axons
         self.num_axons = num_axons
+        self._validate_num_axons(num_axons)
         self.min_distance = min_distance
-        self.max_distance = max_distance        
+        self._validate_min_distance(min_distance)
+        self.max_distance = max_distance
+        self._validate_max_distance(max_distance)        
         self.stimulation_amp = stimulation_amp
+        self._validate_stimulation_amp(stimulation_amp)        
                 
     
     # Short description: this function gives user some axon coordinates to sample    
@@ -147,6 +153,8 @@ class AxonANNModel:
         # axon_distance
         axon_distance = MetaStimUtil.get_axon_to_lead_dist(self.lead_radius, x_axon, y_axon)
 
+        self._validate_axon_distance(axon_distance)
+        
         # organize inputs to Axon ANN
         o = np.ones((self.num_axons,))
         x_axon_ann_raw = np.column_stack((fs_axon, o * self.axon_diameter, o * self.pulse_width, axon_distance, np.transpose(sd_11_axon)))
@@ -171,7 +179,7 @@ class AxonANNModel:
     # for this demo, there are no errors
     # However, checks need to be in place to let the user know what values are acceptable or not
     # D, fiber diameter
-    def validate_axon_diameter(self, axon_diameter):
+    def _validate_axon_diameter(self, axon_diameter):
         if axon_diameter < 0:
             print('Negative fiber diameter (D)! D must be positive (> 0).')
             print('setting axon_diameter  to 6.')
@@ -179,40 +187,56 @@ class AxonANNModel:
         
         if axon_diameter < 1.5 or axon_diameter > 15:
             print('Warning! Accuracy may be degraded for fiber diameters outside of 1.5-15um.')  
-            exit(-1)
+            sys.exit(1)
 
         
     # CHECK INPUTS
     # for this demo, there are no errors
     # However, checks need to be in place to let the user know what values are acceptable or not
     # D, fiber diameter
-    def validate_pulse_width(self, pulse_width):        
+    def _validate_pulse_width(self, pulse_width):        
         # pw, stimulus pulse width
         if pulse_width < 0:
             print('Negative pulse width (PW)! PW must be positive (> 0).')
-            exit(-2)
+            sys.exit(2)
         # halt the code
         if pulse_width < 30 or pulse_width > 500:
             print('Warning! Accuracy may be degraded for pulse widths outside of 30-500us.')
-            exit(-3)
+            sys.exit(3)
         
 
-    def validate_electrode_list(self, electrode_list):
+    def _validate_electrode_list(self, electrode_list):
         for elec in electrode_list:
             if elec not in [-1, 0, 1]:
                 print("Invalid electrode configuration. Elements must be either -1, 0, or 1.")
-                exit(-4)
+                sys.exit(4)
     
-    def validate_lead(self, lead_id):
+    def _validate_lead(self, lead_id):
         if lead_id not in self.leads.keys():
             print(f"Invalid lead specified. Lead Id must be  of {self.leads.keys()}.")
-            exit(1)
+            sys.exit(5)
         else:
             lead = self.leads.get(lead_id)
             if lead.no != len(self.electrode_list) :
                 print(f"Invalid electrode configuration. {lead_id} contains {lead.no} electrods")
-                exit(3)
-
+                sys.exit(6)
 
             # get radius 
             self.lead_radius = lead.re
+
+    def _validate_num_axons(self, num_axons):
+        pass
+
+    def _validate_min_distance(self, min_distance):
+        pass
+
+    def _validate_max_distance(self, max_distance):
+        pass
+        
+    def _validate_stimulation_amp(self, stimulation_amp):
+        pass
+
+    def _validate_axon_distance(self, axon_distance):
+        if (axon_distance.any() < 0.5  or axon_distance.any() > 9):
+            print("Warning! Accuracy may be degraded as the minimum distance between axon and lead is out of range (0.5mm - 9mm)")
+    
