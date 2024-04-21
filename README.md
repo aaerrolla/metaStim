@@ -53,3 +53,6 @@ visualization.py:  contains matplotlib function to visulize the stimulation
         lead_radius, stimulation_amp, num_axons ( inputs )
         and  x_axon, z_axon, phi_axon, axon_act ( are genrated in previous steps)
     6. call visualize() metohd to generate plot
+
+#### Initial Review Comments
+
