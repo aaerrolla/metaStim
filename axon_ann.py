@@ -8,8 +8,9 @@ from utils import MetaStimUtil
 from lead_selector import LeadSelector
 
 
-# AxonANNModel : calculates the voltage required to activate the axons of neurons
+
 class AxonANNModel:
+    """calculates the voltage required to activate the axons of neurons"""
 
     def __init__(self, lead_id, electrode_list, pulse_width , stimulation_amp, num_axons=10, min_distance=1, max_distance=5, axon_diameter=6):        
         self.axon_diameter = axon_diameter
@@ -32,18 +33,20 @@ class AxonANNModel:
         self._validate_stimulation_amp(stimulation_amp)        
                 
     
-    # Short description: this function gives user some axon coordinates to sample    
-    # num_axons, number of axon
-    # min_distance, minimum distance from the lead (default = 1mm)
-    # max_distance, maximum distance from the lead (default = 5mm)
-    # D, axon diameter (default = 6um)
-    # OUTPUT:
-    # x, y, and z coordinates of axon [in mm]
-    # NOTES:
-    # - all axons are parallel to the cylindrical lead; this is a simple example for now
-    # - future versions of code will pull axons from a data atlas depending on the brain location or application
-    # - it will be more efficient to return points in one data structure
+    
     def axon_coord(self):
+        """This function gives user some axon coordinates to sample    
+            num_axons, number of axon
+            min_distance, minimum distance from the lead (default = 1mm)
+            max_distance, maximum distance from the lead (default = 5mm)
+            D, axon diameter (default = 6um)
+            OUTPUT:
+                x, y, and z coordinates of axon [in mm]
+            NOTES:
+                - all axons are parallel to the cylindrical lead; this is a simple example for now
+                - future versions of code will pull axons from a data atlas depending on the brain location or application
+                - it will be more efficient to return points in one data structure
+        """
         inl = 100 * self.axon_diameter / 1e3 # distance between nodes on an axon
 
         z_base = np.arange(-5, 16, inl)
@@ -56,20 +59,20 @@ class AxonANNModel:
         return x_axon,y_axon,z_axon
 
     
-    # field_ann
-    # Short description: this is a main function that calculates the electric potentials across axons
-    # e_config, electrode configuration(s) (1, # electrodes)
-    # - 0 is off, 1 is on and positive, -1 is on and negative
-    # ax_coord, xyz coordinates of each axon (3 x # points per axon x # axons)
-    # amp, stimulation amplitude in Volts
-    # lead, lead model (optional, Model 6172 is the selectable option right now)
-    # OUTPUT:
-    # phi, electric potentials from Field ANN for each axon [in V]
-    # NOTES:
-    # - each axon in this demo has the same number of nodes / points
-    # - the code should be generalized so that each axon can have different # pts / axon
-    # - this could be done with a struct or a n x 4 matrix [axon ID, x, y, z], where n = # of points across all axons 
     def field_ann(self):
+        """This is a main function that calculates the electric potentials across axons
+           Args:
+           electrode_list: electrode configuration(s) (1, # electrodes) 0 is off, 1 is on and positive, -1 is on and negative
+           axon_coord: xyz coordinates of each axon (3 x # points per axon x # axons)
+           amp, stimulation amplitude in Volts
+           lead, lead model (optional, Model 6172 is the selectable option right now)
+           OUTPUT:
+             phi, electric potentials from Field ANN for each axon [in V]
+           NOTES:
+                each axon in this demo has the same number of nodes / points
+                the code should be generalized so that each axon can have different # pts / axon
+                this could be done with a struct or a n x 4 matrix [axon ID, x, y, z], where n = # of points across all axons 
+        """
         electrode_config = np.array(self.electrode_list) # electrode configuration (+1, -1, or 0)
         num_electrodes = electrode_config.shape[0] # total number of electrodes
         num_electrodes_on = np.sum(np.abs(electrode_config))
@@ -116,11 +119,12 @@ class AxonANNModel:
         return phi_axon
 
 
-    # axon_ann 
-    # Short Description : Predict axon activation based on electric potentials
-    # Output: axon activation
+    
+    
     def axon_ann(self):
-        
+        """Predict axon activation based on electric potentials
+           Output: axon activation
+        """
         data_dir = os.getcwd()
         axon_ann_setting_file = data_dir + '/axon-ann-model/ann-axon-settings.json'
         axon_ann_weight_file = data_dir + '/axon-ann-model/ann-axon-weights.h5'

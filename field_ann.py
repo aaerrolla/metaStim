@@ -5,37 +5,56 @@ import matplotlib.pyplot as plt
 from keras.models import model_from_json
 from sklearn.preprocessing import StandardScaler
 
-
+import validations
 
 class FieldANNModel:
-    def __init__(self, ec):
-        self.ec = ec        
+    def __init__(self, electrode_config):
+        self.electrode_config = electrode_config
+        validations.validate_electrode_list(electrode_config)
 
     def load_model(self):
-        dataDir = os.path.join(os.getcwd(), "field-ann-models")
-        nElecOn = np.sum(np.abs(ec))  # Total number of electrodes on
-        modelPath = os.path.join(dataDir, f'ann-field-ec{nElecOn}-settings.json')
-        weightPath = os.path.join(dataDir, f'ann-field-ec{nElecOn}-weights.h5')
-        stdscaPath = os.path.join(dataDir, f'ann-field-ec{nElecOn}-input-std.bin')
+        """loads field ANN files and creates model"""
+        data_dir = os.path.join(os.getcwd(), "field-ann-models")
+        num_elec_on = np.sum(np.abs(self.electrode_config))  # Total number of electrodes on
+        model_path = os.path.join(data_dir, f'ann-field-ec{num_elec_on}-settings.json')
+        weight_path = os.path.join(data_dir, f'ann-field-ec{num_elec_on}-weights.h5')
+        std_sca_path = os.path.join(data_dir, f'ann-field-ec{num_elec_on}-input-std.bin')
         
-        with open(modelPath, 'r') as f:
+        with open(model_path, 'r') as f:
             model_json = f.read()
             self.model = model_from_json(model_json)
         
-        self.model.load_weights(weightPath)
-        self.std_scaler = load(stdscaPath)
+        self.model.load_weights(weight_path)
+        self.std_scaler = load(std_sca_path)
 
-    def predict_field(self, z, x=1, y=1):         
-        xyz = np.column_stack((x*np.ones(z.shape), y*np.ones(z.shape), z))
-        nPts = z.shape[0]
-        xModel_raw = np.column_stack((np.tile(self.ec, (nPts, 1)), xyz))
-        xModel = self.std_scaler.transform(xModel_raw)
-        yModel = np.exp(self.model.predict(xModel).reshape(-1)) - 1
-        return yModel
+    def predict_field(self, x, y, z):
+        """evluate the model 
+           Args:
+            x: x vector  
+            y: y vector
+            z: z vector 
+           Returns:
+            y_model 
+        """         
+        xyz = np.column_stack((x, y, z))
+        num_points = z.shape[0]
+        x_model_raw = np.column_stack((np.tile(self.electrode_config, (num_points, 1)), xyz))
+        x_model = self.std_scaler.transform(x_model_raw)
+        y_model = np.exp(self.model.predict(x_model).reshape(-1)) - 1
+        return y_model
     
-    def visualize_field(self, z, stimAmp):
+    def visualize_field(self, x, y, z, stim_amp):
+        """visualize field using matplotlib
+           Args:              
+            x: x vector  
+            y: y vector
+            z: z vector
+            stim_amp: stimulation amplitude            
+           Returns:
+            None
+        """
         font = {'family': 'serif', 'color': 'black', 'size': 20}
-        plt.plot(z, stimAmp * self.predict_field(z), 'k-', linewidth=1)
+        plt.plot(z, stim_amp * self.predict_field(x, y, z), 'k-', linewidth=1)
         plt.title('Sample field calculation', fontdict=font)
         plt.xlabel('z (mm)', fontdict=font)
         plt.ylabel('$\Phi$ (V)', fontdict=font)
@@ -43,27 +62,21 @@ class FieldANNModel:
 
 
 if __name__ == "__main__":
-    ec = np.array([0, 1, 1, 1, 1, 1, 1, 0])  # Electrode configuration (+1, -1, or 0)
-    stimAmp = 3  # Stimulation amplitude in Volts
+    electrode_config = np.array([0, 1, 1, 1, 1, 1, 1, 0])  # Electrode configuration (+1, -1, or 0)
+    stim_amp = 3  # Stimulation amplitude in Volts
 
-    # Specify z values for field calculation
+    # Specify x, y and z values for field calculation
     z = np.linspace(-5, 16, num=100)
-
-    print(f"z.shape : {z.shape}")
     x = 1 * np.ones(z.shape);
-    print(f"x.shape : {x.shape}")
-    
     y = 1 * np.ones(z.shape);
-    print(f"y.shape : {y.shape}")
 
-    xyz = np.column_stack((x, y, z))
-    print(f"xyz.shape : {xyz.shape}")
 
-    # Create an instance of FieldCalculator class
-    field_calculator = FieldANNModel(ec)
+
+    # Create an instance of FieldANNModel class
+    field_calculator = FieldANNModel(electrode_config)
 
     # Load the model
     field_calculator.load_model()
 
     # Visualize the field calculation
-    field_calculator.visualize_field(z, stimAmp)
+    field_calculator.visualize_field(x, y, z, stim_amp)
