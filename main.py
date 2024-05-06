@@ -5,7 +5,7 @@ import os
 if __name__ == "__main__":
     # lead_radius = 0.635 # [mm]
     lead_id  = '6172'
-    electrode_list = [1, 0, 0, 0, 0, -1, 0, 0]
+    electrode_list = [1, 0, 0, 0, -1, 0, 0, 0]
     stimulation_amp = 3 # [V]
     pulse_width = 90 #[us]
     num_axons = 10
@@ -25,15 +25,15 @@ if __name__ == "__main__":
     axon_act = axon_ann_model.axon_ann()
 
     visualization = Visualization(lead_id, stimulation_amp, num_axons, x_axon, z_axon, phi_axon, axon_act)
-    visualization.visualize()
+    visualization.visualize1(electrode_list)
 
-
-    # axon_ann_model.electrode_list = [0, 1, 1, 1, 1, 1, 1, 0]
-    # axon_ann_model.stimulation_amp = 10
+    electrode_list = [0, 1, 1, 1, 1, 1, 1, 0]
+    axon_ann_model.electrode_list = electrode_list
+    axon_ann_model.stimulation_amp = 10
     
-    # x_axon, y_axon, z_axon = axon_ann_model.axon_coord()
-    # phi_axon = axon_ann_model.field_ann()
-    # axon_act = axon_ann_model.axon_ann()
+    x_axon, y_axon, z_axon = axon_ann_model.axon_coord()
+    phi_axon = axon_ann_model.field_ann()
+    axon_act = axon_ann_model.axon_ann()
 
-    # visualization = Visualization(lead_radius, stimulation_amp, num_axons, x_axon, z_axon, phi_axon, axon_act)
-    # visualization.visualize()
+    visualization = Visualization(lead_id, stimulation_amp, num_axons, x_axon, z_axon, phi_axon, axon_act)
+    visualization.visualize1(electrode_list)
