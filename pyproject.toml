@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "metastim"
+version = "0.0.1"
+authors = [
+  { name="Anjaneyulu Aerrolla", email="aaerrolla@gmail.com" },
+]
+description = "MetaStim: python package for DBS, enables to experimentation for various input parameters for DBS"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+dependencies = [
+    "joblib==1.3.2",
+    "numpy==1.26.4",
+    "matplotlib==3.8.2",
+    "keras==2.15.0",
+    "scikit-learn==1.4.0",
+    "tensorflow==2.15.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/aaerrolla/metastim"
+Issues = "https://github.com/aaerrolla/metastim/issues"
+
+
+[tool.setuptools]
+package-data = {"metastim" = ["axon-ann-model/*.*", "field-ann-models/*.*", "DBSLead-smry.csv"]}
+

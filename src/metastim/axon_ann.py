@@ -1,11 +1,12 @@
 import numpy as np
 import sys
-import os
+from importlib import resources
 from keras.models import model_from_json
 from joblib import dump, load
 
-from utils import MetaStimUtil
-from lead_selector import LeadSelector
+from metastim import utils
+from metastim import lead_selector
+from metastim import visualization as vis
 
 
 
@@ -19,8 +20,8 @@ class AxonANNModel:
         self._validate_pulse_width(pulse_width)        
         self.electrode_list = electrode_list
         self._validate_electrode_list(electrode_list)
-        lead_selector =  LeadSelector('DBSLead-smry.csv')
-        self.leads = lead_selector.load_leads();        
+        leadselector =  lead_selector.LeadSelector('DBSLead-smry.csv')
+        self.leads = leadselector.load_leads();        
         self._validate_lead(lead_id)        
         # TODO: validation for num_axons
         self.num_axons = num_axons
@@ -78,27 +79,26 @@ class AxonANNModel:
         num_electrodes_on = np.sum(np.abs(electrode_config))
         x_axon, y_axon, z_axon = self.axon_coord()
         # directories and filenames
-        data_dir = os.getcwd()
 
         # ----- Load Field ANN files ---
-        field_ann_setting_file = data_dir + '/field-ann-models/ann-field-ec' + str(num_electrodes_on) + '-settings.json'
-        field_ann_weight_file = data_dir + '/field-ann-models/ann-field-ec'  + str(num_electrodes_on) + '-weights.h5'
-        field_ann_std_in_file = data_dir + '/field-ann-models/ann-field-ec' + str(num_electrodes_on) + '-input-std.bin'
+        field_ann_setting_file = f'ann-field-ec{num_electrodes_on}-settings.json'
+        field_ann_weight_file = f'ann-field-ec{num_electrodes_on}-weights.h5'
+        field_ann_std_file = f'ann-field-ec{num_electrodes_on}-input-std.bin'
 
         # ----- LOAD MODEL -----
         # load ann model
-        #print('Loading model settings...')
-        with open(field_ann_setting_file, 'r') as f:
-            json_data = f.read()
-        field_model = model_from_json(json_data)
+        
+        with resources.open_text("metastim.field-ann-models", field_ann_setting_file) as settings_file:
+            json_data = settings_file.read()
+            field_model = model_from_json(json_data)
 
         #load weights
-        #print('Loading model weights...')
-        field_model.load_weights(field_ann_weight_file)
+        with resources.open_binary("metastim.field-ann-models", field_ann_weight_file) as weight_file:
+            field_model.load_weights(weight_file.name)
 
         # load standard scalar for inputs
-        #print('Loading input standarization fit...')
-        sc_field = load(field_ann_std_in_file)
+        with resources.open_binary("metastim.field-ann-models", field_ann_std_file) as std_file:            
+            sc_field = load(std_file.name)
 
         # Calculate Potentials from Field ANN
         phi_axon = np.zeros(x_axon.shape)
@@ -124,38 +124,33 @@ class AxonANNModel:
     def axon_ann(self):
         """Predict axon activation based on electric potentials
            Output: axon activation
-        """
-        data_dir = os.getcwd()
-        axon_ann_setting_file = data_dir + '/axon-ann-model/ann-axon-settings.json'
-        axon_ann_weight_file = data_dir + '/axon-ann-model/ann-axon-weights.h5'
-        axon_ann_std_in_file = data_dir + '/axon-ann-model/ann-axon-input-std.bin'
-
+        """        
+        
         x_axon, y_axon, z_axon = self.axon_coord()
         phi_axon = self.field_ann()
 
         # ----- LOAD Axon ANN Model -----
-        # load ann model
-        # print('Loading Axon ANN settings...')
-        with open(axon_ann_setting_file, 'r') as f:
-            json_data = f.read()
-        axon_model = model_from_json(json_data)
+        # load ann model        
+        with resources.open_text("metastim.axon-ann-model", "ann-axon-settings.json") as settings_file:
+            json_data = settings_file.read()
+            axon_model = model_from_json(json_data)
 
         #load weights
-        # print('Loading Axon ANN weights...')
-        axon_model.load_weights(axon_ann_weight_file)
+        with resources.open_text("metastim.axon-ann-model", "ann-axon-weights.h5") as weights_file:
+            axon_model.load_weights(weights_file.name)
 
         # load standard scalar for inputs
-        # print('Loading Axon ANN input standarization...')
-        sc_axon = load(axon_ann_std_in_file)
+        with resources.open_text("metastim.axon-ann-model", "ann-axon-input-std.bin") as std_file:
+            sc_axon = load(std_file.name)
 
         # sd_11_axon
-        sd_11_axon = MetaStimUtil.get_field_sd(self.num_axons, phi_axon)
+        sd_11_axon = utils.MetaStimUtil.get_field_sd(self.num_axons, phi_axon)
 
         # fx_axon
-        fs_axon = MetaStimUtil.get_field_shape(self.num_axons, sd_11_axon)
+        fs_axon = utils.MetaStimUtil.get_field_shape(self.num_axons, sd_11_axon)
 
         # axon_distance
-        axon_distance = MetaStimUtil.get_axon_to_lead_dist(self.lead_radius, x_axon, y_axon)
+        axon_distance = utils.MetaStimUtil.get_axon_to_lead_dist(self.lead_radius, x_axon, y_axon)
 
         self._validate_axon_distance(axon_distance)
         
@@ -244,3 +239,27 @@ class AxonANNModel:
         if (axon_distance.any() < 0.5  or axon_distance.any() > 9):
             print("Warning! Accuracy may be degraded as the minimum distance between axon and lead is out of range (0.5mm - 9mm)")
     
+
+def main():
+    """This exists for testing this module"""
+    lead_id = '6172'
+    electrode_list = [1, 0, 0, 0, -1, 0, 0, 0]
+    stimulation_amp = 3
+    pulse_width = 90
+    num_axons = 10
+    min_distance = 1
+    max_distance = 5
+    axon_diameter = 6
+
+    axon_ann_model = AxonANNModel(lead_id, electrode_list,  pulse_width, stimulation_amp, num_axons, min_distance, max_distance, axon_diameter)
+
+    x_axon, y_axon, z_axon = axon_ann_model.axon_coord()
+
+    phi_axon = axon_ann_model.field_ann()
+    axon_act = axon_ann_model.axon_ann()
+
+    visualization = vis.Visualization(lead_id, stimulation_amp, num_axons, x_axon, z_axon, phi_axon, axon_act)
+    visualization.visualize1(electrode_list)
+
+if __name__ == "__main__":
+    main()

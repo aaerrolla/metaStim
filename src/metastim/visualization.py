@@ -4,12 +4,12 @@ import matplotlib.image as image
 import os
 import sys
 
-from lead_selector import LeadSelector
+from metastim import lead_selector as ls
 
 
 class Visualization:
     def __init__(self, lead_id, stimulation_amp, num_axons, x_axon, z_axon, phi_axon, axon_activation):
-        lead_selector =  LeadSelector('DBSLead-smry.csv')
+        lead_selector =  ls.LeadSelector('DBSLead-smry.csv')
         self.leads = lead_selector.load_leads();          
         # self.lead_radius = lead_radius
         self._validate_lead(lead_id)
