@@ -32,7 +32,7 @@ if __name__ == "__main__":
     axon_ann_model = axon_ann.AxonANN(electrode_list,  pulse_width, stimulation_amp, num_axons, axon_diameter)
     field_ann_model = field_ann.FieldANN(electrode_list)
 
-    phi_axon = field_ann.field_ann(x_axon, y_axon, z_axon)
+    phi_axon = field_ann_model.field_ann(x_axon, y_axon, z_axon)
     axon_act = axon_ann_model.axon_ann(x_axon, y_axon, z_axon, lead_radius)
 
     visual_demo1 = vis.Visualization(lead_id, stimulation_amp, num_axons, x_axon, z_axon, phi_axon, axon_act)
