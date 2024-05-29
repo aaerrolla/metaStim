@@ -11,3 +11,4 @@ def validate_electrode_list(electrode_list):
         if elec not in [-1, 0, 1]:
             print("Invalid electrode configuration. Elements must be either -1, 0, or 1.")
             sys.exit(4)
+

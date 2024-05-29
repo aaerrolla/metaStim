@@ -1,6 +1,8 @@
 from metastim import field_ann, axon_ann
+from metastim.utils import MetaStimUtil
 from metastim import visualization as vis
 import os
+import numpy as np
 
 if __name__ == "__main__":
     # lead_radius = 0.635 # [mm]
@@ -13,27 +15,37 @@ if __name__ == "__main__":
     max_distance = 5
     axon_diameter = 6 # [um]
 
+    lead_radius = MetaStimUtil.get_lead_radius(lead_id, electrode_list)
+
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1' 
 
-    # (self, lead_id, electrode_list, pulse_width , stimulation_amp, num_axons=10, min_distance=1, max_distance=5, axon_diameter=6):   
+    inl = 100 * axon_diameter / 1e3 # distance between nodes on an axon
 
-    axon_ann_model = axon_ann.AxonANNModel(lead_id, electrode_list,  pulse_width, stimulation_amp, num_axons, min_distance, max_distance, axon_diameter)
+    z_base = np.arange(-5, 16, inl)
+    num_axon_nodes = z_base.shape[0]
 
-    x_axon, y_axon, z_axon = axon_ann_model.axon_coord()
+    x_axon = np.repeat(np.linspace(min_distance, max_distance, num=num_axons), num_axon_nodes).reshape(num_axon_nodes, num_axons, order='F') + lead_radius
+    y_axon = np.zeros(x_axon.shape)
+    z_axon = np.repeat(z_base, num_axons).reshape(num_axon_nodes, num_axons)
 
-    phi_axon = axon_ann_model.field_ann()
-    axon_act = axon_ann_model.axon_ann()
+
+    axon_ann_model = axon_ann.AxonANN(electrode_list,  pulse_width, stimulation_amp, num_axons, axon_diameter)
+    field_ann_model = field_ann.FieldANN(electrode_list)
+
+    phi_axon = field_ann.field_ann(x_axon, y_axon, z_axon)
+    axon_act = axon_ann_model.axon_ann(x_axon, y_axon, z_axon, lead_radius)
 
     visual_demo1 = vis.Visualization(lead_id, stimulation_amp, num_axons, x_axon, z_axon, phi_axon, axon_act)
     visual_demo1.visualize1(electrode_list)
 
-    electrode_list = [0, 1, 1, 1, 1, 1, 1, 0]
-    axon_ann_model.electrode_list = electrode_list
-    axon_ann_model.stimulation_amp = 10
-    
-    x_axon, y_axon, z_axon = axon_ann_model.axon_coord()
-    phi_axon = axon_ann_model.field_ann()
-    axon_act = axon_ann_model.axon_ann()
 
-    visual_demo2 = vis.Visualization(lead_id, stimulation_amp, num_axons, x_axon, z_axon, phi_axon, axon_act)
-    visual_demo2.visualize1(electrode_list)
+    # electrode_list = [0, 1, 1, 1, 1, 1, 1, 0]
+    # axon_ann_model.electrode_list = electrode_list
+    # axon_ann_model.stimulation_amp = 10
+    
+    # x_axon, y_axon, z_axon = axon_ann_model.axon_coord()
+    # phi_axon = axon_ann_model.field_ann()
+    # axon_act = axon_ann_model.axon_ann()
+
+    # visual_demo2 = vis.Visualization(lead_id, stimulation_amp, num_axons, x_axon, z_axon, phi_axon, axon_act)
+    # visual_demo2.visualize1(electrode_list)

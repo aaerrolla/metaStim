@@ -1,7 +1,9 @@
 import numpy as np
+import sys
+from metastim import lead_selector
 
 
-class MetaStimUtil():
+class MetaStimUtil:
 
     # FUNCTION = field_sd(phi (req))
     # Short description: this is an auxiliary function that calculates SD from phi
@@ -86,3 +88,21 @@ class MetaStimUtil():
         axon_distance = axon_radius - lead_radius
         axon_distance[axon_distance < 0] = 'NaN'
         return axon_distance
+
+
+    @staticmethod
+    def get_lead_radius(lead_id, electrode_list):
+        leadselector =  lead_selector.LeadSelector('DBSLead-smry.csv')
+        leads = leadselector.load_leads();        
+        
+        if lead_id not in leads.keys():
+            print(f"Invalid lead specified. Lead Id must be  of {leads.keys()}.")
+            sys.exit(5)
+        else:
+            lead = leads.get(lead_id)
+            if lead.no != len(electrode_list) :
+                print(f"Invalid electrode configuration. {lead_id} contains {lead.no} electrods")
+                sys.exit(6)
+
+            # get radius 
+            return lead.re
