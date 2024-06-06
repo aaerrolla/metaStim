@@ -1,12 +1,15 @@
 # MetaStim DBS in Python
 
-### Instructions  to  use metastim  python package
+### How to use metastim  python package
 
 #### Install Instructions:
 
 1. create python3 virtual environment  (  python version  required  3.8   or higher)
 
+
 ```    
+mkdir  -p  ~/project/metastim  # or any directory  of  your choice
+cd project/metastim
 python3 -m venv venv
 ```
 
@@ -15,20 +18,42 @@ python3 -m venv venv
 ```
 source venv/bin/activate
 ```
+if above command is scuccess  your terminal prompt will change to denote that  you are in python virtual environment.
+
+
 3. Install metastim package
+
+from being in python virtual environment  type 
 
 ```
 pip install metastim
 ```
 
+4. start python interactive shell
+
+```
+python3  
+```
+
+5. Test if you can import metastim modules 
+
+try to import metastim modules filed_ann and axon_ann  as shown below 
+if you do not see any errors ,  you successfully installed metastim package 
+
+```
+>>> from metastim import field_ann, axon_ann
+```
 
 
-#### Usage Example 
+#### How to Use MetaStim 
 
-Sample demo code is provided here that shows usage of metastim 
-copy this code into let say  demo.py  and  run  from the same virtual environment created above 
+Sample demo code is provided below shows usage of metastim 
+copy this code into let say demo.py  int  ~/project/metastim  folder 
+and run within virtual environment created above 
 
-or alternatively [demo.py](./demo.py) avialable in this repositoty
+or 
+
+alternatively you can download [demo.py](./demo.py) avialable in this repositoty and run it in the virtual environment created above
 
 ```
 python3 demo.py
@@ -81,6 +106,31 @@ if __name__ == "__main__":
 
 
 A Sample Jupitor note book file is aviable in this repository  at  [demo.ipynb](./demo.ipynb)
+
+1. donwload demo.ipynb  and copy to  ~/projects/metastim folder 
+
+2. activate python virtual environment if it is not activated already 
+
+```
+cd ~/projects/metastim
+
+source venv/bin/activate
+```
+
+3. Open  vscode 
+
+```
+code .
+```
+
+4. Run demo.ipynb jupitor notebook file 
+
+After vscode opens, open demo.ipynb file and click "Run All" button
+vscode suggests to install  ipython server if ipython is not already installed 
+install ipython by repsonding to vscode prompt.
+
+If ipython server already present in vscode then vscode ask to select environment , select the virtual env 
+
 
 
 
