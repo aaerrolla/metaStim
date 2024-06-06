@@ -5,7 +5,7 @@ import os
 import numpy as np
 
 if __name__ == "__main__":
-    # lead_radius = 0.635 # [mm]
+    
     lead_id  = '6172'
     electrode_list = [1, 0, 0, 0, -1, 0, 0, 0]
     stimulation_amp = 3 # [V]
@@ -16,8 +16,6 @@ if __name__ == "__main__":
     axon_diameter = 6 # [um]
 
     lead_radius = MetaStimUtil.get_lead_radius(lead_id, electrode_list)
-
-    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1' 
 
     inl = 100 * axon_diameter / 1e3 # distance between nodes on an axon
 
@@ -37,15 +35,3 @@ if __name__ == "__main__":
 
     visual_demo1 = vis.Visualization(lead_id, stimulation_amp, num_axons, x_axon, z_axon, phi_axon, axon_act)
     visual_demo1.visualize1(electrode_list)
-
-
-    # electrode_list = [0, 1, 1, 1, 1, 1, 1, 0]
-    # axon_ann_model.electrode_list = electrode_list
-    # axon_ann_model.stimulation_amp = 10
-    
-    # x_axon, y_axon, z_axon = axon_ann_model.axon_coord()
-    # phi_axon = axon_ann_model.field_ann()
-    # axon_act = axon_ann_model.axon_ann()
-
-    # visual_demo2 = vis.Visualization(lead_id, stimulation_amp, num_axons, x_axon, z_axon, phi_axon, axon_act)
-    # visual_demo2.visualize1(electrode_list)
