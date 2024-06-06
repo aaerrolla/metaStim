@@ -25,14 +25,16 @@ pip install metastim
 
 #### Usage Example 
 
-Below provided example demo on  how to use metastim 
+Sample demo code is provided here that shows usage of metastim 
 copy this code into let say  demo.py  and  run  from the same virtual environment created above 
+
+or alternatively [demo.py](./demo.py) avialable in this repositoty
 
 ```
 python3 demo.py
 ```
 
-Here is the complete 
+Here is the complete code.
 
 ```
 from metastim import field_ann, axon_ann
