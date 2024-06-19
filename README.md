@@ -130,11 +130,3 @@ vscode suggests to install  ipython server if ipython is not already installed
 install ipython by repsonding to vscode prompt.
 
 If ipython server already present in vscode then vscode ask to select environment , select the virtual env 
-
-
-
-
-
-
-
-

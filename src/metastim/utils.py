@@ -18,8 +18,8 @@ class MetaStimUtil:
     # - each axon in this demo has the same number of nodes / points
     # - the code should be generalized so that each axon can have different # pts / axon
     # - however, by this part in the code, only 11SD are calculated per axon, so data can be held in a 2D array    
-    @staticmethod
-    def get_field_sd(num_axons, phi_axon):
+    @classmethod
+    def get_field_sd(cls, num_axons, phi_axon):
         sd_axon = 1e3 * np.diff(phi_axon, n=2, axis=0)  # V => mV
         sd_max_indx = np.argmax(sd_axon, axis=0)  # row index per column where SD is max
 
@@ -53,8 +53,8 @@ class MetaStimUtil:
     # NOTES:
     # -this is a stopgap based on a simple thresholding of a feature
     # -a more advanced classification will be implemented in a future code ver
-    @staticmethod
-    def get_field_shape(num_axons, sd_11_axon):
+    @classmethod
+    def get_field_shape(cls, num_axons, sd_11_axon):
         fs_axon = np.zeros((num_axons,))
 
         # calculate maximum SD for each axon
@@ -81,8 +81,8 @@ class MetaStimUtil:
     # NOTES:
     # -this calculation works for an ideal setup where the lead and axons are perfectly parallel to each other and aligned with the z axis
     # -future version of this code will calculate d for arbitrary lead angles and non-straight axon trajectories
-    @staticmethod
-    def get_axon_to_lead_dist(lead_radius, x_axon, y_axon):
+    @classmethod
+    def get_axon_to_lead_dist(cls, lead_radius, x_axon, y_axon):
         # calculate distance of axon to z axis at xy = (0,0)
         axon_radius = np.sqrt(np.min(x_axon, axis=0) ** 2 + np.min(y_axon, axis=0) ** 2)
         axon_distance = axon_radius - lead_radius
@@ -90,8 +90,8 @@ class MetaStimUtil:
         return axon_distance
 
 
-    @staticmethod
-    def get_lead_radius(lead_id, electrode_list):
+    @classmethod
+    def get_lead_radius(cls, lead_id, electrode_list):
         leadselector =  lead_selector.LeadSelector('DBSLead-smry.csv')
         leads = leadselector.load_leads();        
         

@@ -34,4 +34,4 @@ if __name__ == "__main__":
     axon_act = axon_ann_model.axon_ann(x_axon, y_axon, z_axon, lead_radius)
 
     visual_demo1 = vis.Visualization(lead_id, stimulation_amp, num_axons, x_axon, z_axon, phi_axon, axon_act)
-    visual_demo1.visualize1(electrode_list)
+    visual_demo1.visualize(electrode_list)
