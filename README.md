@@ -47,8 +47,8 @@ if you do not see any errors ,  you successfully installed metastim package
 
 #### How to Use MetaStim 
 
-Sample demo code is provided below shows usage of metastim 
-copy this code into let say demo.py  int  ~/project/metastim  folder 
+Sample demo code is provided below, it shows usage of metastim 
+copy this code into let say demo.py  in  ~/project/metastim  folder 
 and run within virtual environment created above 
 
 or 
