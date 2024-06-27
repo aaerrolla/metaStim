@@ -66,7 +66,7 @@ class AxonANN:
 
         # evaluate the Axon ANN model
         y_axon_ann = np.exp(axon_model.predict(x_axon_ann).reshape(-1))
-        axon_activation = (y_axon_ann <= self.stimulation_amp).astype(int)
+        axon_activation = (y_axon_ann <= self.stimulation_amp).astype(float)
 
         return axon_activation
 
