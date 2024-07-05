@@ -26,9 +26,9 @@ class AxonANN:
         self.axon_diameter = axon_diameter
         self._validate_axon_diameter(axon_diameter)
     
-    def axon_ann(self, x_axon, y_axon, z_axon, lead_radius):
+    def axon_ann(self, x_axon, y_axon, z_axon, lead_radius, threshold = None):
         """Predict axon activation based on electric potentials
-           Output: axon activation
+           Output: (axon_activation, axon_thresholds) 
         """                
         field_ann_model = field_ann.FieldANN(self.electrode_list)
         phi_axon = field_ann_model.field_ann(x_axon, y_axon, z_axon)
@@ -65,10 +65,18 @@ class AxonANN:
         x_axon_ann = sc_axon.transform(x_axon_ann_raw)
 
         # evaluate the Axon ANN model
-        y_axon_ann = np.exp(axon_model.predict(x_axon_ann).reshape(-1))
-        axon_activation = (y_axon_ann <= self.stimulation_amp).astype(float)
+        y_axon_ann = np.exp(axon_model.predict(x_axon_ann).reshape(-1))        
+        axon_activation = (y_axon_ann <= self.stimulation_amp).astype(int)        
 
-        return axon_activation
+        if threshold == None:
+            threshold = False
+
+        if threshold:
+            axon_thresholds = (y_axon_ann <= self.stimulation_amp).astype(float)
+            return axon_activation, axon_thresholds
+        else:
+            return axon_activation, 
+        
 
     def __repr__(self):
         properties = ", ".join(f"{key}='{value}'" for key, value in vars(self).items())
@@ -77,36 +85,29 @@ class AxonANN:
     def __str__(self):        
         return self.__repr__()
     
-    # CHECK INPUTS
-    # for this demo, there are no errors
-    # However, checks need to be in place to let the user know what values are acceptable or not
-    # D, fiber diameter
+        
     def _validate_axon_diameter(self, axon_diameter):
-        if axon_diameter < 0:
-            print('Negative fiber diameter (D)! D must be positive (> 0).')
-            print('setting axon_diameter  to 6.')
-            self.axon_diameter = 6 # reset to default value and continue        
-        
+        """Axon Diameter(D) validate:
+            if axon_diameter <= 0  print error and exit 
+            if  1.5 > axon_diameter < 15  print Warning and continue
+        """
+        if axon_diameter <= 0:
+            print('Error: Negative or Zero fiber diameter (D), D must be non-zero and positive (> 0).')
+            sys.exit(1)        
         if axon_diameter < 1.5 or axon_diameter > 15:
-            print('Warning! Accuracy may be degraded for fiber diameters outside of 1.5-15um.')  
-            sys.exit(1)
+            print('Warning! Accuracy may be degraded for fiber diameters outside of 1.5-15um.')              
 
-        
-    # CHECK INPUTS
-    # for this demo, there are no errors
-    # However, checks need to be in place to let the user know what values are acceptable or not
-    # D, fiber diameter
     def _validate_pulse_width(self, pulse_width):        
-        # pw, stimulus pulse width
-        if pulse_width < 0:
-            print('Negative pulse width (PW)! PW must be positive (> 0).')
-            sys.exit(2)
-        # halt the code
+        """stimulus pulse width(pw)  pulse_width validation:
+            if pw <= 0  print Error and exit
+            if  30 < pw > 500 : issue Warning continue
+        """ 
+        if pulse_width <= 0:
+            print('Error: Negative or Zero pulse width (PW)! PW must be non-zero and positive (> 0).')
+            sys.exit(2)        
         if pulse_width < 30 or pulse_width > 500:
-            print('Warning! Accuracy may be degraded for pulse widths outside of 30-500us.')
-            sys.exit(3)
+            print('Warning! Accuracy may be degraded for pulse widths outside of 30-500us.')            
         
-
     def _validate_electrode_list(self, electrode_list):
         for elec in electrode_list:
             if elec not in [-1, 0, 1]:
@@ -130,7 +131,9 @@ class AxonANN:
         pass
         
     def _validate_stimulation_amp(self, stimulation_amp):
-        pass
+        """use magnitude of stimulation_amp
+        """
+        self.stimulation_amp = abs(stimulation_amp)
 
     def _validate_axon_distance(self, axon_distance):
         if (axon_distance.any() < 0.5  or axon_distance.any() > 9):

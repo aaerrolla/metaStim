@@ -4,8 +4,9 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "metastim"
-version = "0.0.4"
+version = "0.0.5"
 authors = [
+  { name="Bryan Howell", email="bryanhowell1228@gmail.com" },
   { name="Anjaneyulu Aerrolla", email="aaerrolla@gmail.com" },
 ]
 description = "MetaStim: python package for DBS, enables to experimentation for various input parameters for DBS"

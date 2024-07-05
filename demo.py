@@ -27,11 +27,15 @@ if __name__ == "__main__":
     z_axon = np.repeat(z_base, num_axons).reshape(num_axon_nodes, num_axons)
 
 
-    axon_ann_model = axon_ann.AxonANN(electrode_list,  pulse_width, stimulation_amp, num_axons, axon_diameter)
+    axon_ann_model  = axon_ann.AxonANN(electrode_list,  pulse_width, stimulation_amp, num_axons, axon_diameter)
     field_ann_model = field_ann.FieldANN(electrode_list)
 
     phi_axon = field_ann_model.field_ann(x_axon, y_axon, z_axon)
-    axon_act = axon_ann_model.axon_ann(x_axon, y_axon, z_axon, lead_radius)
+    (axon_act, ) = axon_ann_model.axon_ann(x_axon, y_axon, z_axon, lead_radius)
+
+    (axon_act, axon_th) = axon_ann_model.axon_ann(x_axon, y_axon, z_axon, lead_radius, threshold=True)
+
+    print(axon_th)
 
     visual_demo1 = vis.Visualization(lead_id, stimulation_amp, num_axons, x_axon, z_axon, phi_axon, axon_act)
     visual_demo1.visualize(electrode_list)
