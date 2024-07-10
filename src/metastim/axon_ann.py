@@ -72,10 +72,10 @@ class AxonANN:
             threshold = False
 
         if threshold:
-            axon_thresholds = (y_axon_ann <= self.stimulation_amp).astype(float)
+            axon_thresholds = np.round(y_axon_ann, 2)
             return axon_activation, axon_thresholds
-        else:
-            return axon_activation, 
+        
+        return axon_activation, 
         
 
     def __repr__(self):
