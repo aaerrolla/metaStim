@@ -31,10 +31,22 @@ if __name__ == "__main__":
     field_ann_model = field_ann.FieldANN(electrode_list)
 
     phi_axon = field_ann_model.field_ann(x_axon, y_axon, z_axon)
+
+    # no threshold values
     (axon_act, ) = axon_ann_model.axon_ann(x_axon, y_axon, z_axon, lead_radius)
 
+    # this below call  is same as above 
+    #(axon_act, ) = axon_ann_model.axon_ann(x_axon, y_axon, z_axon, lead_radius, threshold=False)
+
+    # returns threshold values 
     (axon_act, axon_th) = axon_ann_model.axon_ann(x_axon, y_axon, z_axon, lead_radius, threshold=True)
 
+    # plot using axon_act vector 
     visual_demo1 = vis.Visualization(lead_id, stimulation_amp, num_axons, x_axon, z_axon, phi_axon, axon_act)
     visual_demo1.visualize(electrode_list)
+
+    # plot using threshold vector axon_th 
+    visual_demo2 = vis.Visualization(lead_id, stimulation_amp, num_axons, x_axon, z_axon, phi_axon, axon_th)
+    visual_demo2.visualize(electrode_list)
+
 
